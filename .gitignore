@@ -1,0 +1,33 @@
+# Build output
+build/
+
+# CubeMX generated / IDE cache
+mx.scratch
+.mxproject
+.settings/
+
+# IDE backup files
+*.copy.json
+*.json.bak
+.vscode/launch copy.json
+
+# Toolchain (not part of source)
+xpack-openocd-0.12.0-7/
+
+# Downloaded archives
+*.zip
+
+# AI assistant data
+.claude/
+
+# clangd cache
+.clangd
+
+# User-specific VS Code settings (contains local paths)
+.vscode/settings.json
+
+# Personal work log
+worklog.md
+
+# Unused third-party code (was replaced by own implementation)
+ThirdParty/SEGGER_RTT/
