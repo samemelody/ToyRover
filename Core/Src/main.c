@@ -363,7 +363,63 @@ int __io_putchar(int ch)
 
 static void proto_handler(const proto_cmd_t *cmd)
 {
-    printf("[CMD] recv cmd=0x%02X len=%d\r\n", cmd->cmd, cmd->payload_len);
+    /* Decode and log command with parameters */
+    switch (cmd->cmd) {
+    case CMD_MOVE: {
+        cmd_move_t mv;
+        if (protocol_parse_move(cmd, &mv)) {
+            printf("[CMD] MOVE dir=%s speed=%d%%",
+                   mv.direction == DIR_FORWARD ? "FWD" : "BWD", mv.speed);
+            if (mv.duration_ms > 0) {
+                printf(" dur=%ums", mv.duration_ms);
+            } else {
+                printf(" dur=continuous");
+            }
+            printf("\r\n");
+        } else {
+            printf("[CMD] MOVE (bad payload len=%d)\r\n", cmd->payload_len);
+        }
+        break;
+    }
+    case CMD_TURN: {
+        cmd_turn_t tn;
+        if (protocol_parse_turn(cmd, &tn)) {
+            printf("[CMD] TURN %s angle=%d deg speed=%d%%\r\n",
+                   tn.direction == TURN_LEFT ? "LEFT" : "RIGHT",
+                   tn.angle, tn.speed);
+        } else {
+            printf("[CMD] TURN (bad payload len=%d)\r\n", cmd->payload_len);
+        }
+        break;
+    }
+    case CMD_ARC: {
+        cmd_arc_t arc;
+        if (protocol_parse_arc(cmd, &arc)) {
+            printf("[CMD] ARC dir=%s %s speed=%d%% radius=%dcm\r\n",
+                   arc.direction == DIR_FORWARD ? "FWD" : "BWD",
+                   arc.turn_dir == TURN_LEFT ? "LEFT" : "RIGHT",
+                   arc.speed, arc.radius_cm);
+        } else {
+            printf("[CMD] ARC (bad payload len=%d)\r\n", cmd->payload_len);
+        }
+        break;
+    }
+    case CMD_STOP:
+        printf("[CMD] STOP\r\n");
+        break;
+    case CMD_HEARTBEAT: {
+        cmd_heartbeat_t hb;
+        if (protocol_parse_heartbeat(cmd, &hb)) {
+            printf("[CMD] HEARTBEAT seq=%d\r\n", hb.seq);
+        } else {
+            printf("[CMD] HEARTBEAT (bad payload)\r\n");
+        }
+        break;
+    }
+    default:
+        printf("[CMD] UNKNOWN 0x%02X len=%d\r\n", cmd->cmd, cmd->payload_len);
+        break;
+    }
     proto_cmd_dispatch(&g_proto_ctx, cmd);
 }
 
